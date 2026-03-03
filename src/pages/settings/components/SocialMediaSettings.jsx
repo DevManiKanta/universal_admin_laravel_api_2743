@@ -1,23 +1,21 @@
 import { useEffect, useState } from "react";
 import SettingsLayout from "../SettingsLayout";
 import api from "../../../api/axios";
-import toast from "react-hot-toast";
 import {
   Linkedin,
   Dribbble,
   Instagram,
   Twitter,
   Youtube,
-  Facebook,
   Link as LinkIcon,
 } from "lucide-react";
 
 const SOCIALS = [
   { key: "linkedin", label: "LinkedIn", icon: Linkedin },
-  { key: "youtube", label: "YouTube", icon: Youtube },
-  { key: "dribbble", label: "facebook", icon: Facebook },
+  { key: "dribbble", label: "Dribbble", icon: Dribbble },
   { key: "instagram", label: "Instagram", icon: Instagram },
   { key: "twitter", label: "Twitter (X)", icon: Twitter },
+  { key: "youtube", label: "YouTube", icon: Youtube },
 ];
 
 export default function SocialMediaSettings() {
@@ -35,25 +33,10 @@ export default function SocialMediaSettings() {
   /* ---------------- GET ---------------- */
   const fetchSocialLinks = async () => {
     try {
-      setLoading(true);
-      const res = await api.get("/admin-dashboard/social-media-settings");
-
-      if (res.data?.success === false) {
-        toast.error(res.data?.message || "Failed to load social media");
-        return;
-      }
-
-      if (res.data?.data) {
-        setLinks({
-          linkedin: res.data.data.linkedin || "",
-          dribbble: res.data.data.dribbble || "",
-          instagram: res.data.data.instagram || "",
-          twitter: res.data.data.twitter || "",
-          youtube: res.data.data.youtube || "",
-        });
-      }
+      const res = await api.get("/dashboard/social-media");
+      setLinks(res.data.data);
     } catch (err) {
-      toast.error(err.response?.data?.errors || "Failed to load social media");
+      console.error("Failed to load social media", err);
     } finally {
       setLoading(false);
     }
@@ -65,38 +48,17 @@ export default function SocialMediaSettings() {
 
   /* ---------------- CHANGE ---------------- */
   const handleChange = (e) => {
-    setLinks({
-      ...links,
-      [e.target.name]: e.target.value,
-    });
+    setLinks({ ...links, [e.target.name]: e.target.value });
   };
 
   /* ---------------- SAVE ---------------- */
   const handleSave = async () => {
     try {
-      const params = new URLSearchParams();
-
-      Object.entries(links).forEach(([key, value]) => {
-        if (value) {
-          params.append(key, value);
-        }
-      });
-
-      const res = await api.post(
-        `/admin-dashboard/social-media-settings?${params.toString()}`,
-      );
-
-      if (res.data?.success === false) {
-        toast.error(res.data?.message || "Update failed");
-        return;
-      }
-
-      toast.success(res.data?.message || "Social media settings updated");
-
+      await api.put("/dashboard/social-media", links);
       setEditMode(false);
       fetchSocialLinks();
     } catch (err) {
-      toast.error(err.response?.data?.errors || "Update failed");
+      console.error("Update failed", err);
     }
   };
 
@@ -164,7 +126,7 @@ export default function SocialMediaSettings() {
                     />
                     <input
                       name={key}
-                      value={links[key]}
+                      value={links[key] || ""}
                       onChange={handleChange}
                       placeholder={`Enter ${label} URL`}
                       className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -174,11 +136,9 @@ export default function SocialMediaSettings() {
                   <div className="mt-1">
                     {links[key] ? (
                       <a
-                        href={
-                          links[key].startsWith("http")
-                            ? links[key]
-                            : `https://${links[key]}`
-                        }
+                        href={links[key].startsWith("http")
+                          ? links[key]
+                          : `https://${links[key]}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm text-blue-600 hover:underline break-all"

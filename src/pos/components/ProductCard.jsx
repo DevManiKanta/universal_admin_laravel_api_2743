@@ -1,67 +1,35 @@
-
-
-import { useEffect, useRef, useState } from "react";
-
-export default function ProductCard({ product, onClick }) {
-  const images = product.image_url ? [{ image_url: product.image_url }] : [];
-
-  const variants = product.variants || [];
-
-  const [index, setIndex] = useState(0);
-  const timerRef = useRef(null);
-
-  const startHover = () => {
-    if (images.length <= 1) return;
-
-    timerRef.current = setInterval(() => {
-      setIndex((prev) => (prev + 1) % images.length);
-    }, 900);
-  };
-
-  const stopHover = () => {
-    clearInterval(timerRef.current);
-    timerRef.current = null;
-    setIndex(0);
-  };
-
-  useEffect(() => {
-    return () => clearInterval(timerRef.current);
-  }, []);
-
+export default function ProductCard({ product, onAdd }) {
   return (
-    <div
-      onMouseEnter={startHover}
-      onMouseLeave={stopHover}
-      onClick={() => onClick(product)}
-      className="bg-white rounded-2xl border cursor-pointer hover:shadow-lg transition overflow-hidden"
+    <button
+      onClick={() => onAdd(product)}
+      className="
+        bg-white rounded-xl border
+        p-3 flex flex-col
+        hover:shadow-sm transition
+      "
     >
       {/* IMAGE */}
-      <div className="relative h-32 bg-gray-100">
-        {images.length > 0 ? (
+      <div className="h-24 rounded-lg bg-gray-100 flex items-center justify-center mb-2">
+        {product.image ? (
           <img
-            src={images[index]?.image_url}
+            src={product.image}
             alt={product.name}
-            className="h-full w-full object-cover"
+            className="h-full object-contain"
           />
         ) : (
-          <div className="h-full flex items-center justify-center text-gray-400 text-sm">
-            No Image
-          </div>
+          <span className="text-xs text-gray-400">No Image</span>
         )}
       </div>
 
-      {/* INFO */}
-      <div className="p-3">
-        <h4 className="text-sm font-medium line-clamp-2">{product.name}</h4>
+      {/* NAME */}
+      <p className="font-medium text-sm leading-tight line-clamp-1">
+        {product.name}
+      </p>
 
-        <p className="text-sm font-semibold mt-1">
-          ₹ {variants?.[0]?.price || 0}
-        </p>
-
-        <p className="text-xs text-gray-500">
-          {variants?.length || 0} variants
-        </p>
-      </div>
-    </div>
+      {/* PRICE */}
+      <span className="text-sm font-semibold text-green-700 mt-1">
+        ₹ {product.price}
+      </span>
+    </button>
   );
 }

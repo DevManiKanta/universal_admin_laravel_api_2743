@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  // baseURL: import.meta.env.VITE_API_BASE_URL,
-  baseURL: "http://192.168.1.3:8000/api"
+  baseURL: import.meta.env.VITE_API_BASE_URL,
 });
 
 // REQUEST → attach token
@@ -14,7 +13,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => Promise.reject(error)
 );
 
 // RESPONSE → handle 401 & 422 globally
@@ -22,22 +21,21 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error?.response?.status;
-    const token = localStorage.getItem("token");
 
-    // 🔥 Redirect ONLY if token exists (session expired case)
-    if (status === 401 && token) {
+    if (status === 401) {
+      // Token missing / expired
       localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      alert("Session expired. Please login again.");
+      alert(error.response.data.message || "Session expired");
       window.location.href = "/login";
     }
 
     if (status === 422) {
+      // Validation error
       alert(error.response.data.message);
     }
 
     return Promise.reject(error);
-  },
+  }
 );
 
 export default api;

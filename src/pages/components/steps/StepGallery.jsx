@@ -1,15 +1,10 @@
-import { useRef, useState, forwardRef, useImperativeHandle } from "react";
-import api from "../../../api/axios";
+import { useRef, useState } from "react";
 
-const StepGallery = forwardRef(({ productId }, ref) => {
+export default function StepGallery() {
   const inputRef = useRef(null);
-
   const [images, setImages] = useState([]);
   const [mainIndex, setMainIndex] = useState(0);
-  const [videoUrls, setVideoUrls] = useState([""]);
-  const [loading, setLoading] = useState(false);
-
-  /* ================= IMAGE HANDLERS ================= */
+  const [videoUrl, setVideoUrl] = useState("");
 
   const handleFiles = (files) => {
     const list = Array.from(files);
@@ -28,157 +23,29 @@ const StepGallery = forwardRef(({ productId }, ref) => {
     else if (index < mainIndex) setMainIndex((prev) => prev - 1);
   };
 
-  /* ================= VIDEO HANDLERS ================= */
-
-  const addVideoUrl = () => {
-    setVideoUrls((prev) => [...prev, ""]);
-  };
-
-  const removeVideoUrl = (index) => {
-    setVideoUrls((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleVideoChange = (index, value) => {
-    const updated = [...videoUrls];
-    updated[index] = value;
-    setVideoUrls(updated);
-  };
-
-  /* ================= EXPOSE SAVE ================= */
-
-  // useImperativeHandless(ref, () => ({
-  //   async saveStep() {
-  //     if (!productId) {
-  //       alert("Product not created yet");
-  //       return false;
-  //     }
-
-  //     try {
-  //       setLoading(true);
-
-  //       const formData = new FormData();
-
-  //       /* ✅ IMAGES */
-  //       images.forEach((file) => {
-  //         formData.append("images[]", file);
-  //       });
-
-  //       formData.append("main_index", mainIndex);
-
-  //       /* ✅ VIDEO URLS */
-  //       videoUrls
-  //         .filter((v) => v.trim())
-  //         .forEach((url) => {
-  //           formData.append("video_urls[]", url);
-  //         });
-
-  //       /* 🔥 SINGLE API CALL */
-  //       await api.post(
-  //         `/admin-dashboard/product/${productId}/gallery`,
-  //         formData,
-  //         {
-  //           headers: { "Content-Type": "multipart/form-data" },
-  //         },
-  //       );
-
-  //       return true;
-  //     } catch (error) {
-  //       console.error(error);
-  //       alert("Failed to save product gallery");
-  //       return false;
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   },
-  // }));
-
-  useImperativeHandle(ref, () => ({
-    async saveStep() {
-      if (!productId) {
-        alert("Product not created yet");
-        return false;
-      }
-
-      try {
-        setLoading(true);
-
-        const formData = new FormData();
-
-        // ✅ IMAGES
-        if (images.length > 0) {
-          images.forEach((file) => {
-            formData.append("images[]", file);
-          });
-
-          formData.append("main_index", mainIndex);
-        }
-
-        // ✅ VIDEO URLS
-        videoUrls
-          .filter((v) => v.trim())
-          .forEach((url) => {
-            formData.append("video_urls[]", url);
-          });
-
-        await api.post(
-          `/admin-dashboard/product/${productId}/gallery`,
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          },
-        );
-
-        return true;
-      } catch (error) {
-        console.error("API Error:", error);
-
-        let message = "Failed to save product gallery";
-
-        if (error.response) {
-          // Backend responded with error
-          message =
-            error.response.data?.errors ||
-            error.response.data?.message ||
-            "Server error";
-        } else if (error.request) {
-          // Request made but no response
-          message = "No response from server";
-        } else {
-          // Something else happened
-          message = error.message;
-        }
-
-        alert(message);
-        return false;
-      } finally {
-        setLoading(false);
-      }
-    },
-  }));
-
   return (
-    <div className="bg-white rounded-xl border shadow-sm p-6 space-y-6">
-      {/* HEADER */}
+    <div className="space-y-6">
+      {/* TITLE */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-800">Product Gallery</h3>
+        <h3 className="text-base font-semibold text-gray-800">
+          Product Gallery
+        </h3>
         <p className="text-sm text-gray-500">
-          Upload product images and add video links
+          Upload images, choose main image and add product video
         </p>
       </div>
 
       {/* IMAGE UPLOAD */}
       <div
         onClick={() => inputRef.current.click()}
-        className="border-2 border-dashed border-gray-300 rounded-xl p-8
-        flex flex-col items-center justify-center text-center
-        cursor-pointer hover:border-indigo-500 transition"
+        className="border-2 border-dashed border-gray-300 rounded-xl p-6
+                   flex flex-col items-center justify-center text-center
+                   cursor-pointer hover:border-blue-500 transition"
       >
         <UploadIcon />
-        <p className="mt-2 text-sm font-medium text-gray-700">
-          Click to upload images
-        </p>
+        <p className="mt-2 text-sm font-medium">Click to upload images</p>
         <p className="text-xs text-gray-400">
-          JPG, PNG, WEBP • Multiple files allowed
+          Multiple images allowed (JPG, PNG)
         </p>
 
         <input
@@ -191,25 +58,27 @@ const StepGallery = forwardRef(({ productId }, ref) => {
         />
       </div>
 
-      {/* IMAGE GRID */}
+      {/* IMAGE PREVIEW */}
       {images.length > 0 && (
-        <div className="space-y-3">
-          <p className="text-sm font-medium text-gray-700">Select main image</p>
+        <div>
+          <p className="text-sm font-medium mb-2">
+            Click an image to set as main
+          </p>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
             {images.map((img, i) => (
               <div
                 key={i}
                 onClick={() => setMainIndex(i)}
-                className={`relative rounded-xl overflow-hidden border cursor-pointer
-                ${
-                  i === mainIndex
-                    ? "ring-2 ring-indigo-500"
-                    : "hover:ring-2 hover:ring-gray-300"
-                }`}
+                className={`relative rounded-lg overflow-hidden border cursor-pointer
+                  ${
+                    i === mainIndex
+                      ? "ring-2 ring-blue-500"
+                      : "hover:ring-2 hover:ring-gray-300"
+                  }`}
               >
                 {i === mainIndex && (
-                  <span className="absolute top-2 left-2 bg-indigo-600 text-white text-xs px-2 py-0.5 rounded">
+                  <span className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded">
                     Main
                   </span>
                 )}
@@ -217,7 +86,7 @@ const StepGallery = forwardRef(({ productId }, ref) => {
                 <img
                   src={URL.createObjectURL(img)}
                   alt="preview"
-                  className="h-32 w-full object-cover"
+                  className="h-24 w-full object-cover"
                 />
 
                 <button
@@ -225,7 +94,8 @@ const StepGallery = forwardRef(({ productId }, ref) => {
                     e.stopPropagation();
                     removeImage(i);
                   }}
-                  className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded"
+                  className="absolute top-1 right-1 bg-black/70 text-white
+                             text-xs px-2 py-0.5 rounded"
                 >
                   ✕
                 </button>
@@ -235,49 +105,25 @@ const StepGallery = forwardRef(({ productId }, ref) => {
         </div>
       )}
 
-      {/* VIDEO URLS */}
-      <div className="space-y-2">
+      {/* VIDEO URL */}
+      <div>
         <label className="text-sm font-medium text-gray-700">
-          Product Video URLs (optional)
+          Product Video URL (optional)
         </label>
-
-        {videoUrls.map((url, index) => (
-          <div key={index} className="flex gap-2">
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => handleVideoChange(index, e.target.value)}
-              className="input flex-1"
-              placeholder="https://youtube.com/watch?v=..."
-            />
-
-            {videoUrls.length > 1 && (
-              <button
-                type="button"
-                onClick={() => removeVideoUrl(index)}
-                className="px-3 rounded-lg bg-red-500 text-white"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-        ))}
-
-        <button
-          type="button"
-          onClick={addVideoUrl}
-          className="text-sm text-indigo-600 hover:underline"
-        >
-          + Add another video
-        </button>
+        <input
+          type="url"
+          value={videoUrl}
+          onChange={(e) => setVideoUrl(e.target.value)}
+          placeholder="https://youtube.com/watch?v=..."
+          className="input mt-1"
+        />
+        <p className="text-xs text-gray-400 mt-1">
+          YouTube / Vimeo / any public video link
+        </p>
       </div>
-
-      {loading && <p className="text-sm text-indigo-600">Saving gallery...</p>}
     </div>
   );
-});
-
-export default StepGallery;
+}
 
 /* ================= ICON ================= */
 

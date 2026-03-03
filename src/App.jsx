@@ -1,10 +1,111 @@
+// import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+// import Login from "./pages/Login";
+// import Dashboard from "./pages/Dashboard";
+// import Products from "./pages/Products";
+// import Employees from "./pages/Employees";
+// import AddClient from "./pages/AddClient";
+// import ViewClient from "./pages/ViewClient";
+// import EditClient from "./pages/EditClient";
+// import Confirmation from "./pages/Confirmation";
+// import ConfirmationList from "./pages/ConfirmationList";
+// import JobConfirmation from "./pages/JobConfirmation";
+// import ConfirmationPrint from "./pages/ConfirmationPrint";
+// import InvoiceCashMemoList from "./pages/InvoiceCashMemoList";
+// import InvoicePrint from "./pages/InvoicePrint";
+// import InvoiceWithLogoPrint from "./pages/InvoiceWithLogoPrint";
+// import ExtraCharges from "./pages/ExtraCharges";
+// import CashMemoPrint from "./pages/CashMemoPrint";
+// import RateCard from "./pages/RateCard";
+// import Category from "./pages/Category";
+// import Clarity from "./pages/Clarity";
+// import Item from "./pages/Item";
+// import Color from "./pages/Color";
+// import Cut from "./pages/Cut";
+// import Metal from "./pages/Metal";
+// import JewelleryJobCard from "./pages/JewelleryJobCard";
+// import GemStoneJobCard from "./pages/GemStoneJobCard";
+// import DimondJobCard from "./pages/DimondJobCard";
+
+// import ProtectedRoute from "./auth/ProtectedRoute";
+// import PublicRoute from "./auth/PublicRoute";
+// import DashboardLayout from "./layouts/DashboardLayout";
+
+// export default function App() {
+//   return (
+//     <BrowserRouter>
+//       <Routes>
+//         {/* Public route */}
+//         <Route
+//           path="/login"
+//           element={
+//             <PublicRoute>
+//               <Login />
+//             </PublicRoute>
+//           }
+//         />
+
+//         {/* Protected routes with layout */}
+//         <Route
+//           element={
+//             <ProtectedRoute>
+//               <DashboardLayout />
+//             </ProtectedRoute>
+//           }
+//         >
+//           <Route path="/add-client" element={<AddClient />} />
+//           <Route path="/dashboard" element={<Dashboard />} />
+//           <Route path="/products" element={<Products />} />
+//           <Route path="/employees" element={<Employees />} />
+//           <Route path="/view-client" element={<ViewClient />} />
+//           <Route path="/edit-client/:id" element={<EditClient />} />
+//           <Route path="/confirmation" element={<Confirmation />} />
+//           <Route path="/confirmation-list" element={<ConfirmationList />} />
+//           <Route
+//             path="/invoice-cash-memo-list"
+//             element={<InvoiceCashMemoList />}
+//           />
+
+//           <Route path="/edit-confirmation/:id" element={<JobConfirmation />} />
+//           <Route path="/invoice/:id" element={<InvoicePrint />} />
+//           <Route path="/invoice-logo/:id" element={<InvoiceWithLogoPrint />} />
+//           <Route path="/extra-charge/:id" element={<ExtraCharges />} />
+//           <Route path="/cash-memo/:id" element={<CashMemoPrint />} />
+//           <Route path="/categories" element={<Category />} />
+//           <Route path="/clarity" element={<Clarity />} />
+//           <Route path="/items" element={<Item />} />
+//           <Route path="/colors" element={<Color />} />
+//           <Route path="/cuts" element={<Cut />} />
+//           <Route path="/metal" element={<Metal />} />
+//           <Route path="/jewellery-job-card" element={<JewelleryJobCard />} />
+//           <Route path="/gem-stone-job-card" element={<GemStoneJobCard />} />
+//           <Route path="/diamond-job-card" element={<DimondJobCard />} />
+//           <Route
+//             path="/confirmation-print/:id"
+//             element={<ConfirmationPrint />}
+//           />
+
+//           <Route path="/rate-card" element={<RateCard />} />
+//           {/* <Route path="/clarity" element={<Clarity />} />
+//           <Route path="/items" element={<Items />} /> */}
+
+
+//         </Route>
+
+//         {/* Default */}
+//         <Route path="*" element={<Login />} />
+//       </Routes>
+//     </BrowserRouter>
+//   );
+// }
+
+
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { isHerbal, isHamsini } from "./config/projectConfig";
 
 /* AUTH */
 import ProtectedRoute from "./auth/ProtectedRoute";
 import PublicRoute from "./auth/PublicRoute";
-import { Toaster } from "react-hot-toast";
 
 /* LAYOUT */
 import DashboardLayout from "./layouts/DashboardLayout";
@@ -12,334 +113,154 @@ import DashboardLayout from "./layouts/DashboardLayout";
 /* PAGES */
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import ProductsNew from "./pages/ProductsNew";
+import Products from "./pages/Products";
 import Employees from "./pages/Employees";
-import ComingSoon from "./pages/ComingSoon";
+import AddClient from "./pages/AddClient";
+import ViewClient from "./pages/ViewClient";
+import EditClient from "./pages/EditClient";
+import Confirmation from "./pages/Confirmation";
+import ConfirmationList from "./pages/ConfirmationList";
+import JobConfirmation from "./pages/JobConfirmation";
+import ConfirmationPrint from "./pages/ConfirmationPrint";
+import InvoiceCashMemoList from "./pages/InvoiceCashMemoList";
+import InvoicePrint from "./pages/InvoicePrint";
+import InvoiceWithLogoPrint from "./pages/InvoiceWithLogoPrint";
+import ExtraCharges from "./pages/ExtraCharges";
+import CashMemoPrint from "./pages/CashMemoPrint";
+import RateCard from "./pages/RateCard";
+import POS from "./pos/POS";
+
+
+/* MASTER DATA */
 import Category from "./pages/Category";
 import Brands from "./pages/brands/Brands";
-import OrdersPage from "./pages/OrdersPage";
-import OrderDetail from "./pages/OrderDetail";
-import POS from "./pos/POS";
-import POSOrders from "./pages/POSOrders";
-import POSOrderView from "./pages/POSOrderView";
-import CustomerCombinedReport from "./pages/CustomerCombinedReport";
-import StaffAttendanceCalendar from "./pages/StaffAttendanceCalendar";
-import AddCategory from "./pages/AddCategory";
-import CustomerManagement from "./pages/CustomerManagement";
-import CustomerOrders from "./pages/CustomerOrders";
-import ManualOrderDetails from "./pages/ManualOrderDetails";
-import ManualOrders from "./pages/ManualOrders";
+import Clarity from "./pages/Clarity";
+import Item from "./pages/Item";
+import Color from "./pages/Color";
+import Cut from "./pages/Cut";
+import Metal from "./pages/Metal";
 
-/* SETTINGS */
+/* JOB CARDS */
+import JewelleryJobCard from "./pages/JewelleryJobCard";
+import GemStoneJobCard from "./pages/GemStoneJobCard";
+import DimondJobCard from "./pages/DimondJobCard";
+import Orders from "./pages/orders/Orders";
+
 import SettingsPage from "./pages/settings/SettingsPage";
-import ProfileSettings from "./pages/settings/components/ProfileSettings";
-import LogoSettings from "./pages/settings/components/LogoSettings";
 import SocialMediaSettings from "./pages/settings/components/SocialMediaSettings";
 import PaymentGatewaySettings from "./pages/settings/components/PaymentGatewaySettings";
+import ProfileSettings from "./pages/settings/components/ProfileSettings";
+import LogoSettings from "./pages/settings/components/LogoSettings";
 import VariationSettings from "./pages/settings/components/VariationSettings";
 import WhatsAppIntegrationSettings from "./pages/settings/components/WhatsAppIntegrationSettings";
-import CouponSettings from "./pages/settings/components/CouponSettings";
-import BannerSettings from "./pages/settings/components/BannerSettings";
-import ContactSettings from "./pages/settings/components/ContactSettings";
-import CustomerCareSettings from "./pages/settings/components/CustomerCareSettings";
-import BannerAdmin from "./pages/settings/components/BannerAdmin";
-import ShippingSettings from "./pages/settings/components/ShippingSettings";
+import AccountSettings from "./pages/settings/components/AccountSettings";
 
-/* PROVIDERS */
-import { LogoSettingsProvider } from "./context/LogoSettingsContext";
-import { ProfileProvider } from "./context/ProfileContext";
 
-/* BRAND PROTECTED */
-import BrandProtectedRoute from "./auth/BrandProtectedRoute";
-import ManualOrders1 from "./pages/ManualOrders1";
-import MyAttendance from "./pages/MyAttendance";
-import SectionManager from "./pages/SectionManager";
-import SectionList from "./pages/admin/section/SectionList";
-import SectionDragDrop from "./pages/admin/section/SectionDragDrop";
-import PageList from "./pages/admin/pages/PageList";
-import BlogCategoryList from "./pages/admin/blog-category/CategoryList";
-import BlogList from "./pages/admin/blog/BlogList";
+// import SettingsPage from "./pages/settings/SettingsPage";
+
+
 
 export default function App() {
-  const user = JSON.parse(localStorage.getItem("user"));
-  const role = user?.role;
-
-  console.log("User role:", role);
-
-  const settingsRoutes = (
-    <>
-      <Route index element={<Navigate to="profile" replace />} />
-      <Route path="profile" element={<ProfileSettings />} />
-      <Route path="logo" element={<LogoSettings />} />
-      <Route path="social-media" element={<SocialMediaSettings />} />
-      <Route path="payment-gateway" element={<PaymentGatewaySettings />} />
-      <Route path="variation-settings" element={<VariationSettings />} />
-      <Route path="whatsapp-integration" element={<WhatsAppIntegrationSettings />} />
-      <Route path="contact-page" element={<ContactSettings />} />
-      <Route path="customer-care-settings" element={<CustomerCareSettings />} />
-      <Route path="coupons-settings" element={<CouponSettings />} />
-      <Route path="banner-settings" element={<BannerSettings />} />
-      <Route path="landing-banner-settings" element={<BannerAdmin />} />
-      <Route path="shipping-settings" element={<ShippingSettings />} />
-      <Route path="product-sections" element={<SectionManager />} />
-      <Route path="footer-sections" element={<SectionList />} />
-      <Route path="footer-sections/reorder" element={<SectionDragDrop />} />
-      <Route path="pages" element={<PageList />} />
-      <Route path="blog-categories" element={<BlogCategoryList />} />
-      <Route path="blogs" element={<BlogList />} />
-      <Route path="*" element={<Navigate to="profile" replace />} />
-    </>
-  );
-
   return (
     <BrowserRouter>
-      <LogoSettingsProvider>
-        <ProfileProvider>
-          <Toaster position="top-right" reverseOrder={false} />
+      <Routes>
+        {/* ---------------- PUBLIC ---------------- */}
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
 
-          <Routes>
-            {/* ================= PUBLIC ================= */}
+        {/* ---------------- PROTECTED ---------------- */}
+        <Route
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          {/* DEFAULT AFTER LOGIN */}
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+
+          {/* DASHBOARD */}
+          <Route path="/dashboard" element={<Dashboard />} />
+
+          {/* CLIENTS */}
+          {/* <Route path="/add-client" element={<AddClient />} />
+          <Route path="/view-client" element={<ViewClient />} />
+          <Route path="/edit-client/:id" element={<EditClient />} /> */}
+
+          {/* PRODUCTS & MASTER */}
+          <Route path="/products" element={<Products />} />
+          <Route path="/categories" element={<Category />} />
+          <Route path="/brands" element={<Brands />} />
+          <Route path="/employees" element={<Employees />} />
+         <Route path="/" element={<Navigate to="/settings/social-media" />} />  
+
+        {/* SETTINGS */}
+            <Route path="/settings" element={<SettingsPage />}>
+              <Route path="profile" element={<ProfileSettings />} />
+              <Route path="logo" element={<LogoSettings />} />
+              <Route path="social-media" element={<SocialMediaSettings />} />
+              <Route path="payment-gateway" element={<PaymentGatewaySettings />} />
+              <Route path="variation-settings" element={<VariationSettings />} />
+
+              <Route path="account-settings" element={<AccountSettings />} />
+              <Route path="whatsapp-integration" element={<WhatsAppIntegrationSettings />} />
+            </Route>  
+
+
+
+          {/* MASTER ATTRIBUTES */}
+          <Route path="/clarity" element={<Clarity />} />
+          <Route path="/items" element={<Item />} />
+          <Route path="/colors" element={<Color />} />
+          <Route path="/cuts" element={<Cut />} />
+          <Route path="/metal" element={<Metal />} />
+
+          {/* CONFIRMATION */}
+          <Route path="/confirmation" element={<Confirmation />} />
+          <Route path="/confirmation-list" element={<ConfirmationList />} />
+          <Route path="/edit-confirmation/:id" element={<JobConfirmation />} />
+          <Route path="/confirmation-print/:id" element={<ConfirmationPrint />} />
+
+          {/* INVOICE */}
+          <Route
+            path="/invoice-cash-memo-list"
+            element={<InvoiceCashMemoList />}
+          />
+          <Route path="/invoice/:id" element={<InvoicePrint />} />
+          <Route path="/invoice-logo/:id" element={<InvoiceWithLogoPrint />} />
+          <Route path="/extra-charge/:id" element={<ExtraCharges />} />
+          <Route path="/cash-memo/:id" element={<CashMemoPrint />} />
+
+          {/* JOB CARDS */}
+          <Route path="/jewellery-job-card" element={<JewelleryJobCard />} />
+          <Route path="/gem-stone-job-card" element={<GemStoneJobCard />} />
+          <Route path="/diamond-job-card" element={<DimondJobCard />} />
+
+          {/* RATE CARD */}
+          <Route path="/rate-card" element={<RateCard />} />
+             <Route path="/orders" element={<Orders />} />
+
             <Route
-              path="/login"
-              element={
-                <PublicRoute>
-                  <Login />
-                </PublicRoute>
-              }
-            />
+          path="/pos"
+          element={
+            <ProtectedRoute>
+              <POS />
+            </ProtectedRoute>
+          }
+        />
 
-            {/* ================= PROTECTED ================= */}
-            <Route
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              {/* ================= EMPLOYEE ================= */}
-              {role === "employee" && (
-                <>
-                  {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-                  <Route path="/pos" element={<POS />} />
 
-                  <Route path="/pos/orders" element={<ManualOrders1 />} />
-                  <Route
-                    path="/calling/order/:id"
-                    element={<ManualOrderDetails />}
-                  />
+        </Route>
 
-                  <Route path="/customers" element={<CustomerManagement />} />
-                  <Route path="/pos/orders/:id" element={<POSOrderView />} />
-                  <Route path="/staff-attendance" element={<MyAttendance />} />
-                  <Route path="*" element={<Navigate to="/pos" />} />
-                </>
-              )}
-
-              {/* MyAttendance  ,StaffAttendanceCalendar */}
-              {/* ================= ADMIN ================= */}
-              {role === "admin" && (
-                <>
-                  {/* HERBAL */}
-                  {isHerbal && (
-                    <>
-                      <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/products" element={<ProductsNew />} />
-                      <Route path="/add-categories" element={<AddCategory />} />
-                      <Route path="/pos" element={<POS />} />
-                      <Route
-                        path="/customers"
-                        element={<CustomerManagement />}
-                      />
-                      <Route
-                        path="/customers/:id/orders"
-                        element={<CustomerOrders />}
-                      />
-                      <Route path="/pos/orders" element={<ManualOrders />} />
-                      <Route
-                        path="/calling/order/:id"
-                        element={<ManualOrderDetails />}
-                      />
-                      <Route
-                        path="/staff-attendance"
-                        element={<StaffAttendanceCalendar />}
-                      />
-                      <Route path="/online-orders" element={<OrdersPage />} />
-                    </>
-                  )}
-
-                  {/* HAMSINI */}
-                  {isHamsini && (
-                    <>
-                      <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/products" element={<ProductsNew />} />
-                      <Route path="/categories" element={<Category />} />
-                      <Route
-                        path="/staff-attendance"
-                        element={<StaffAttendanceCalendar />}
-                      />
-                    </>
-                  )}
-
-                  {/* COMMON ADMIN */}
-                  <Route path="/employees" element={<Employees />} />
-                  <Route path="/orders" element={<POSOrders />} />
-                  <Route path="/pos/orders/:id" element={<POSOrderView />} />
-                  <Route path="/orders/:id" element={<OrderDetail />} />
-                  <Route path="/users" element={<CustomerCombinedReport />} />
-                  <Route path="/expenses" element={<ComingSoon />} />
-                  <Route path="/reports" element={<ComingSoon />} />
-
-                  <Route
-                    path="/brands"
-                    element={
-                      <BrandProtectedRoute>
-                        <Brands />
-                      </BrandProtectedRoute>
-                    }
-                  />
-
-                  {/* SETTINGS */}
-                  <Route path="/settings" element={<SettingsPage />}>
-                    {settingsRoutes}
-                  </Route>
-                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                </>
-              )}
-            </Route>
-
-            {/* ================= FALLBACK ================= */}
-            <Route path="*" element={<Navigate to="/login" />} />
-          </Routes>
-        </ProfileProvider>
-      </LogoSettingsProvider>
+        {/* ---------------- FALLBACK ---------------- */}
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
     </BrowserRouter>
   );
 }
-
-// import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-// import { isHerbal, isHamsini } from "./config/projectConfig";
-// import { useAuth } from "./auth/AuthContext";
-
-// import ProtectedRoute from "./auth/ProtectedRoute";
-// import PublicRoute from "./auth/PublicRoute";
-// import { Toaster } from "react-hot-toast";
-
-// import DashboardLayout from "./layouts/DashboardLayout";
-
-// import Login from "./pages/Login";
-// import Dashboard from "./pages/Dashboard";
-// import Products from "./pages/Products";
-// import Employees from "./pages/Employees";
-// import ComingSoon from "./pages/ComingSoon";
-// import Category from "./pages/Category";
-// import Brands from "./pages/brands/Brands";
-// import OrdersPage from "./pages/OrdersPage";
-// import OrderDetail from "./pages/OrderDetail";
-// import POS from "./pos/POS";
-// import POSOrders from "./pages/POSOrders";
-// import POSOrderView from "./pages/POSOrderView";
-// import CustomerCombinedReport from "./pages/CustomerCombinedReport";
-// import StaffAttendanceCalendar from "./pages/StaffAttendanceCalendar";
-// import AddCategory from "./pages/AddCategory";
-// import CustomerManagement from "./pages/CustomerManagement";
-// import CustomerOrders from "./pages/CustomerOrders";
-// import ManualOrderDetails from "./pages/ManualOrderDetails";
-// import ManualOrders from "./pages/ManualOrders";
-// import ManualOrders1 from "./pages/ManualOrders1";
-// import MyAttendance from "./pages/MyAttendance";
-
-// import SettingsPage from "./pages/settings/SettingsPage";
-// import ProfileSettings from "./pages/settings/components/ProfileSettings";
-// import LogoSettings from "./pages/settings/components/LogoSettings";
-// import SocialMediaSettings from "./pages/settings/components/SocialMediaSettings";
-// import PaymentGatewaySettings from "./pages/settings/components/PaymentGatewaySettings";
-// import VariationSettings from "./pages/settings/components/VariationSettings";
-// import WhatsAppIntegrationSettings from "./pages/settings/components/WhatsAppIntegrationSettings";
-// import CouponSettings from "./pages/settings/components/CouponSettings";
-// import BannerSettings from "./pages/settings/components/BannerSettings";
-
-// import BrandProtectedRoute from "./auth/BrandProtectedRoute";
-
-// function AppRoutes() {
-//   const { user } = useAuth();
-//   const role = user?.role;
-
-//   return (
-//     <Routes>
-//       {/* PUBLIC */}
-//       <Route
-//         path="/login"
-//         element={
-//           <PublicRoute>
-//             <Login />
-//           </PublicRoute>
-//         }
-//       />
-
-//       {/* PROTECTED */}
-//       <Route
-//         element={
-//           <ProtectedRoute>
-//             <DashboardLayout />
-//           </ProtectedRoute>
-//         }
-//       >
-//         {/* EMPLOYEE */}
-//         {role === "employee" && (
-//           <>
-//             <Route path="/pos" element={<POS />} />
-//             <Route path="/pos/orders" element={<ManualOrders1 />} />
-//             <Route path="/calling/order/:id" element={<ManualOrderDetails />} />
-//             <Route path="/customers" element={<CustomerManagement />} />
-//             <Route path="/pos/orders/:id" element={<POSOrderView />} />
-//             <Route path="/staff-attendance" element={<MyAttendance />} />
-//             <Route path="*" element={<Navigate to="/pos" replace />} />
-//           </>
-//         )}
-
-//         {/* ADMIN */}
-//         {role === "admin" && (
-//           <>
-//             <Route path="/dashboard" element={<Dashboard />} />
-//             <Route path="/products" element={<Products />} />
-//             <Route path="/employees" element={<Employees />} />
-//             <Route path="/orders" element={<POSOrders />} />
-//             <Route path="/orders/:id" element={<OrderDetail />} />
-//             <Route path="/brands" element={<Brands />} />
-
-//             <Route path="/settings" element={<SettingsPage />}>
-//               <Route path="profile" element={<ProfileSettings />} />
-//               <Route path="logo" element={<LogoSettings />} />
-//               <Route path="social-media" element={<SocialMediaSettings />} />
-//               <Route
-//                 path="payment-gateway"
-//                 element={<PaymentGatewaySettings />}
-//               />
-//               <Route
-//                 path="variation-settings"
-//                 element={<VariationSettings />}
-//               />
-//               <Route
-//                 path="whatsapp-integration"
-//                 element={<WhatsAppIntegrationSettings />}
-//               />
-//               <Route path="coupons-settings" element={<CouponSettings />} />
-//               <Route path="banner-settings" element={<BannerSettings />} />
-//             </Route>
-//           </>
-//         )}
-//       </Route>
-
-//       <Route path="*" element={<Navigate to="/login" replace />} />
-//     </Routes>
-//   );
-// }
-
-// export default function App() {
-//   return (
-//     <BrowserRouter>
-//       <Toaster position="top-right" reverseOrder={false} />
-//       <AppRoutes />
-//     </BrowserRouter>
-//   );
-// }

@@ -6,47 +6,60 @@ export default function VariationSettings() {
   const [variations, setVariations] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  /* ================= LOAD VARIATIONS ================= */
-  // const loadVariations = async () => {
-
-  const loadVariations = async () => {
+  /* ==============================
+      LOAD VARIATIONS
+  =============================== */
+  const loadVariations123 = async () => {
     try {
-      const res = await api.get("/admin-dashboard/get-variations");
-
-      const normalized = (res.data.data || []).map((v) => ({
-        id: v.id,
-        name: v.name,
-        type: v.type,
-        values: (v.values || []).map((val) =>
-          v.type === "color"
-            ? {
-                id: val.id,
-                label: val.value,
-                code: val.color_code || "#000000",
-              }
-            : {
-                id: val.id,
-                value: val.value,
-              },
-        ),
-      }));
-
-      setVariations(normalized);
+      const res = await api.get("/dashboard/get-variations");
+      setVariations(res.data.data || []);
     } catch (err) {
       console.error(err);
     }
   };
 
+const loadVariations = async () => {
+  try {
+    const res = await api.get("/dashboard/get-variations");
+
+    const normalized = (res.data.data || []).map((v) => ({
+      id: v.id,
+      name: v.name,
+      type: v.type,
+      values: (v.values || []).map((val) =>
+        v.type === "color"
+          ? {
+              id: val.id,
+              label: val.value,        // 👈 IMPORTANT
+              code: val.color_code || "#000000",
+            }
+          : {
+              id: val.id,
+              value: val.value,
+            }
+      ),
+    }));
+
+    setVariations(normalized);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
+
   useEffect(() => {
     loadVariations();
   }, []);
 
-  /* ================= VARIATION CRUD ================= */
+  /* ==============================
+      VARIATION CRUD (UI)
+  =============================== */
   const addVariation = () => {
-    setVariations((prev) => [
-      ...prev,
+    setVariations([
+      ...variations,
       {
-        tempId: Date.now(),
+        tempId: Date.now(), // frontend temp id
         name: "",
         type: "text",
         values: [],
@@ -55,64 +68,71 @@ export default function VariationSettings() {
   };
 
   const updateVariation = (id, field, value) => {
-    setVariations((prev) =>
-      prev.map((v) =>
-        (v.id || v.tempId) === id ? { ...v, [field]: value } : v,
-      ),
+    setVariations(
+      variations.map((v) =>
+        (v.id || v.tempId) === id ? { ...v, [field]: value } : v
+      )
     );
   };
 
   const removeVariation = async (variation) => {
     if (variation.id) {
-      await api.delete(`/admin-dashboard/delete-variations/${variation.id}`);
+      await api.delete(`/dashboard/delete-variations/${variation.id}`);
     }
-
-    setVariations((prev) =>
-      prev.filter(
-        (v) => (v.id || v.tempId) !== (variation.id || variation.tempId),
-      ),
+    setVariations(
+      variations.filter((v) => (v.id || v.tempId) !== (variation.id || variation.tempId))
     );
   };
 
-  /* ================= VALUES CRUD ================= */
-  const addValue = (variationId, type) => {
-    setVariations((prev) =>
-      prev.map((v) =>
-        (v.id || v.tempId) === variationId
-          ? {
-              ...v,
-              values:
-                type === "color"
-                  ? [...v.values, { id: null, label: "", code: "#000000" }]
-                  : [...v.values, { id: null, value: "" }],
-            }
-          : v,
-      ),
-    );
-  };
+  /* ==============================
+      VALUES CRUD (UI)
+  =============================== */
+const addValue = (variationId, type) => {
+  setVariations(
+    variations.map((v) =>
+      (v.id || v.tempId) === variationId
+        ? {
+            ...v,
+            values:
+              type === "color"
+                ? [...v.values, { id: null, label: "", code: "#000000" }]
+                : [...v.values, { id: null, value: "" }],
+          }
+        : v
+    )
+  );
+};
 
-  const updateValue = (variationId, index, field, value) => {
-    setVariations((prev) =>
-      prev.map((v) =>
-        (v.id || v.tempId) === variationId
-          ? {
-              ...v,
-              values: v.values.map((val, i) =>
-                i === index ? { ...val, [field]: value } : val,
-              ),
-            }
-          : v,
-      ),
-    );
-  };
 
-  const removeValue = async (variation, index) => {
-    const value = variation.values[index];
 
+const updateValue = (variationId, index, field, value) => {
+  setVariations(
+    variations.map((v) =>
+      (v.id || v.tempId) === variationId
+        ? {
+            ...v,
+            values: v.values.map((val, i) =>
+              i === index ? { ...val, [field]: value } : val
+            ),
+          }
+        : v
+    )
+  );
+};
+
+
+const removeValue = async (variation, index) => {
+  const value = variation.values[index];
+
+  try {
+    // delete from DB only if already saved
     if (value?.id) {
-      await api.delete(`/admin-dashboard/delete-variation-value/${value.id}`);
+      await api.delete(
+        `/dashboard/delete-variation-value/${value.id}`
+      );
     }
 
+    // remove from UI
     setVariations((prev) =>
       prev.map((v) =>
         (v.id || v.tempId) === (variation.id || variation.tempId)
@@ -120,106 +140,117 @@ export default function VariationSettings() {
               ...v,
               values: v.values.filter((_, i) => i !== index),
             }
-          : v,
-      ),
+          : v
+      )
     );
-  };
+  } catch (err) {
+    console.error("Delete value failed", err);
+    alert("Failed to delete value");
+  }
+};
 
-  /* ================= SAVE ================= */
-  const handleSave = async () => {
-    try {
-      setLoading(true);
 
-      for (const variation of variations) {
-        let variationId = variation.id;
+  /* ==============================
+      SAVE TO BACKEND
+  =============================== */
+const handleSave = async () => {
+  try {
+    setLoading(true);
 
-        if (!variationId) {
-          const res = await api.post("/admin-dashboard/add-variation", {
-            name: variation.name,
-            type: variation.type,
-          });
-          variationId = res.data.data.id;
-          variation.id = variationId;
-        } else {
-          await api.put(`/admin-dashboard/update-variations/${variationId}`, {
-            name: variation.name,
-            type: variation.type,
-          });
-        }
+    for (const variation of variations) {
+      let variationId = variation.id;
 
-        for (const val of variation.values) {
-          if (variation.type === "text") {
-            if (!val.value) continue;
+      /* ======================
+         CREATE / UPDATE VARIATION
+      ======================= */
+      if (!variationId) {
+        const res = await api.post("/dashboard/add-variation", {
+          name: variation.name,
+          type: variation.type,
+        });
 
-            if (!val.id) {
-              const res = await api.post(
-                `/admin-dashboard/add-variation-value/${variationId}`,
-                { value: val.value },
-              );
-              val.id = res.data.data.id;
-            } else {
-              await api.put(
-                `/admin-dashboard/update-variation-value/${val.id}`,
-                {
-                  value: val.value,
-                },
-              );
-            }
-          }
-
-          if (variation.type === "color") {
-            if (!val.label) continue;
-
-            if (!val.id) {
-              const res = await api.post(
-                `/admin-dashboard/add-variation-value/${variationId}`,
-                {
-                  value: val.label,
-                  color_code: val.code,
-                },
-              );
-              val.id = res.data.data.id;
-            } else {
-              await api.put(
-                `/admin-dashboard/update-variation-value/${val.id}`,
-                {
-                  value: val.label,
-                  color_code: val.code,
-                },
-              );
-            }
-          }
-        }
+        variationId = res.data.data.id;
+        variation.id = variationId; // sync frontend
+      } else {
+        await api.put(`/dashboard/update-variations/${variationId}`, {
+          name: variation.name,
+          type: variation.type,
+        });
       }
 
-      alert("Variations saved successfully");
-      loadVariations();
-    } catch (err) {
-      alert("Save failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+      /* ======================
+         ADD / UPDATE VALUES
+      ======================= */
+for (const val of variation.values) {
+  // TEXT
+  if (variation.type === "text") {
+    if (!val.value) continue;
 
-  /* ================= UI ================= */
+    if (!val.id) {
+      const res = await api.post(
+        `/dashboard/add-variation-value/${variationId}`,
+        { value: val.value }
+      );
+      val.id = res.data.data.id;
+    } else {
+      await api.put(
+        `/dashboard/update-variation-value/${val.id}`,
+        { value: val.value }
+      );
+    }
+  }
+
+  // COLOR
+  if (variation.type === "color") {
+    if (!val.label) continue;
+
+    if (!val.id) {
+      const res = await api.post(
+        `/dashboard/add-variation-value/${variationId}`,
+        {
+          value: val.label,
+          color_code: val.code,
+        }
+      );
+      val.id = res.data.data.id;
+    } else {
+      await api.put(
+        `/dashboard/update-variation-value/${val.id}`,
+        {
+          value: val.label,
+          color_code: val.code,
+        }
+      );
+    }
+  }
+}
+
+
+    }
+
+    alert("Variations saved successfully");
+    loadVariations();
+  } catch (err) {
+    console.error(err);
+    alert("Save failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  /* ==============================
+      UI
+  =============================== */
   return (
     <SettingsLayout>
-      <div className="bg-white rounded-xl border shadow-sm p-6 space-y-6">
+      <div className="bg-white rounded-xl border p-6 space-y-6">
         {/* HEADER */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800">
-              Variation Settings
-            </h2>
-            <p className="text-sm text-gray-500">
-              Manage product variations and values
-            </p>
-          </div>
-
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Variation Settings</h2>
           <button
             onClick={addVariation}
-            className="px-4 py-2 rounded-lg border text-sm
-            hover:bg-gray-50 transition"
+            className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50"
           >
             + Add Variation
           </button>
@@ -231,30 +262,34 @@ export default function VariationSettings() {
 
           return (
             <div key={vId} className="border rounded-xl p-4 space-y-4">
-              {/* VAR HEADER */}
+              {/* HEADER */}
               <div className="grid grid-cols-12 gap-4 items-center">
                 <input
                   value={variation.name}
-                  onChange={(e) => updateVariation(vId, "name", e.target.value)}
-                  placeholder="Variation name (e.g. Size)"
-                  className="input col-span-5"
+                  onChange={(e) =>
+                    updateVariation(vId, "name", e.target.value)
+                  }
+                  placeholder="Variation name"
+                  className="col-span-4 border rounded-lg px-3 py-2 text-sm"
                 />
 
                 <select
                   value={variation.type}
-                  onChange={(e) => updateVariation(vId, "type", e.target.value)}
-                  className="input col-span-3"
+                  onChange={(e) =>
+                    updateVariation(vId, "type", e.target.value)
+                  }
+                  className="col-span-3 border rounded-lg px-3 py-2 text-sm"
                 >
                   <option value="text">Text</option>
                   <option value="color">Color</option>
                 </select>
 
-                <div className="col-span-4 text-right">
+                <div className="col-span-5 text-right">
                   <button
                     onClick={() => removeVariation(variation)}
                     className="text-sm text-red-600 hover:underline"
                   >
-                    Remove
+                    Remove Variation
                   </button>
                 </div>
               </div>
@@ -274,7 +309,7 @@ export default function VariationSettings() {
                             updateValue(vId, index, "label", e.target.value)
                           }
                           placeholder="Color name"
-                          className="input col-span-4"
+                          className="col-span-4 border rounded-lg px-3 py-2 text-sm"
                         />
 
                         <input
@@ -283,7 +318,7 @@ export default function VariationSettings() {
                           onChange={(e) =>
                             updateValue(vId, index, "code", e.target.value)
                           }
-                          className="col-span-2 h-10 rounded-lg border"
+                          className="col-span-2 h-10 border rounded-lg"
                         />
 
                         <input
@@ -291,18 +326,19 @@ export default function VariationSettings() {
                           onChange={(e) =>
                             updateValue(vId, index, "code", e.target.value)
                           }
-                          className="input col-span-3"
+                          className="col-span-3 border rounded-lg px-3 py-2 text-sm"
                         />
                       </>
                     ) : (
-                      <input
+                       <input
                         value={val.value}
                         onChange={(e) =>
                           updateValue(vId, index, "value", e.target.value)
                         }
                         placeholder="Value"
-                        className="input col-span-9"
+                        className="col-span-9 border rounded-lg px-3 py-2 text-sm"
                       />
+
                     )}
 
                     <button
@@ -316,7 +352,7 @@ export default function VariationSettings() {
 
                 <button
                   onClick={() => addValue(vId, variation.type)}
-                  className="text-sm text-indigo-600 hover:underline"
+                  className="text-sm text-blue-600 hover:underline"
                 >
                   + Add Value
                 </button>
@@ -330,8 +366,7 @@ export default function VariationSettings() {
           <button
             disabled={loading}
             onClick={handleSave}
-            className="px-5 py-2 rounded-lg bg-indigo-600 text-white
-            hover:bg-indigo-700 disabled:opacity-50 transition"
+            className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
           >
             {loading ? "Saving..." : "Save Variations"}
           </button>

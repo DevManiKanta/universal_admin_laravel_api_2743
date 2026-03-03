@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { Menu, X, Bell, Settings, LogOut, User } from "lucide-react";
+import { Menu, Bell, Settings, LogOut, User } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 import { useLogoSettings } from "../context/LogoSettingsContext";
+import { useLanguage } from "../context/LanguageContext";
 import { useNavigate } from "react-router-dom";
+import LanguageSelector from "../components/LanguageSelector";
 
 export default function Header({ onMenuClick }) {
   const { user, logout } = useAuth();
   const { settings: logoSettings } = useLogoSettings();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -41,17 +44,20 @@ export default function Header({ onMenuClick }) {
           </div>
         </div>
 
-        {/* RIGHT: Notifications + User Menu */}
+        {/* RIGHT: Language + Notifications + User Menu */}
         <div className="flex items-center gap-3">
+          {/* Language Selector */}
+          <LanguageSelector />
+
           {/* Notification Bell */}
           <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative group">
             <Bell size={20} className="text-gray-600" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse-soft" />
+            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
             <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 p-4">
-              <p className="text-sm font-semibold text-gray-900 mb-3">Notifications</p>
+              <p className="text-sm font-semibold text-gray-900 mb-3">{t("notifications")}</p>
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                  <p className="text-sm text-gray-700">No new notifications</p>
+                  <p className="text-sm text-gray-700">{t("noNewNotifications")}</p>
                 </div>
               </div>
             </div>
@@ -88,7 +94,7 @@ export default function Header({ onMenuClick }) {
                     className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors"
                   >
                     <User size={16} />
-                    Profile Settings
+                    {t("profileSettings")}
                   </button>
 
                   <button
@@ -99,7 +105,7 @@ export default function Header({ onMenuClick }) {
                     className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors"
                   >
                     <Settings size={16} />
-                    Settings
+                    {t("settings")}
                   </button>
 
                   <div className="border-t border-gray-100 my-2" />
@@ -109,7 +115,7 @@ export default function Header({ onMenuClick }) {
                     className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
                   >
                     <LogOut size={16} />
-                    Logout
+                    {t("logout")}
                   </button>
                 </div>
               </div>

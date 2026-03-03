@@ -1,11 +1,8 @@
+import { useState } from "react";
 
-
-import { forwardRef, useImperativeHandle, useState } from "react";
-import api from "../../../api/axios";
-
-const StepMeta = forwardRef(({ productId }, ref) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+export default function StepMeta() {
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDesc, setMetaDesc] = useState("");
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
 
@@ -13,97 +10,87 @@ const StepMeta = forwardRef(({ productId }, ref) => {
     if (e.key === "Enter" && tagInput.trim()) {
       e.preventDefault();
       if (!tags.includes(tagInput.trim())) {
-        setTags((prev) => [...prev, tagInput.trim()]);
+        setTags([...tags, tagInput.trim()]);
       }
       setTagInput("");
     }
   };
 
-  const removeTag = (index) => {
-    setTags((prev) => prev.filter((_, i) => i !== index));
+  const removeTag = (tag) => {
+    setTags(tags.filter((t) => t !== tag));
   };
 
-  // 🔥 THIS WILL BE CALLED BY PARENT
-  useImperativeHandle(ref, () => ({
-    async saveStep() {
-      console.log("SEO saveStep called"); // 🔥 debug
-
-      if (!productId) {
-        alert("Product ID missing");
-        return false;
-      }
-
-      try {
-        await api.post(`/admin-dashboard/product-seo-meta/${productId}`, {
-          meta_title: title,
-          meta_description: description,
-          meta_tags: tags.join(","), // ✅ must be string
-        });
-
-        return true;
-      } catch (err) {
-        console.error(err);
-        alert("Failed to save SEO meta");
-        return false;
-      }
-    },
-  }));
-
   return (
-    <div className="bg-white border rounded-xl shadow-sm p-6 space-y-6">
+    <div className="bg-white border rounded-xl p-6 space-y-6">
+      {/* HEADER */}
       <div>
         <h3 className="text-lg font-semibold">SEO Meta Information</h3>
         <p className="text-sm text-gray-500">
-          Optimize how this product appears on search engines
+          Optimize how this product appears on search engines.
         </p>
       </div>
 
+      {/* META TITLE */}
       <div>
         <label className="text-sm font-medium">Meta Title</label>
         <input
+          value={metaTitle}
+          onChange={(e) => setMetaTitle(e.target.value)}
+          placeholder="Product title for search engines"
           className="input mt-1"
           maxLength={60}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
         />
-        <p className="text-xs text-gray-400">{title.length}/60</p>
+        <p className="text-xs text-gray-400 mt-1">
+          {metaTitle.length}/60 characters
+        </p>
       </div>
 
+      {/* META DESCRIPTION */}
       <div>
         <label className="text-sm font-medium">Meta Description</label>
         <textarea
-          rows={3}
-          className="input mt-1"
+          value={metaDesc}
+          onChange={(e) => setMetaDesc(e.target.value)}
+          placeholder="Short description shown in search results"
+          className="input mt-1 min-h-[90px]"
           maxLength={160}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
         />
-        <p className="text-xs text-gray-400">{description.length}/160</p>
+        <p className="text-xs text-gray-400 mt-1">
+          {metaDesc.length}/160 characters
+        </p>
       </div>
 
+      {/* TAGS */}
       <div>
         <label className="text-sm font-medium">Meta Tags</label>
-        <input
-          className="input mt-1"
-          value={tagInput}
-          onChange={(e) => setTagInput(e.target.value)}
-          onKeyDown={addTag}
-          placeholder="Type tag & press Enter"
-        />
 
-        <div className="flex flex-wrap gap-2 mt-2">
-          {tags.map((tag, i) => (
-            <span key={i} className="px-3 py-1 bg-indigo-50 rounded-full">
+        <div className="mt-1 flex flex-wrap items-center gap-2 border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500">
+          {tags.map((tag) => (
+            <span
+              key={tag}
+              className="flex items-center gap-1 bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs"
+            >
               {tag}
-              <button onClick={() => removeTag(i)} className="ml-2">
+              <button
+                onClick={() => removeTag(tag)}
+                className="hover:text-red-600"
+              >
                 ✕
               </button>
             </span>
           ))}
+
+          <input
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={addTag}
+            placeholder="Type & press Enter"
+            className="flex-1 outline-none text-sm"
+          />
         </div>
+
+        <p className="text-xs text-gray-400 mt-1">Press Enter to add tags</p>
       </div>
     </div>
   );
-});
-
-export default StepMeta;
+}

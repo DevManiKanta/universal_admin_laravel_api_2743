@@ -1,19 +1,11 @@
 import { useEffect, useState } from "react";
 import SettingsLayout from "../SettingsLayout";
-import useDynamicTitle from "../../../hooks/useDynamicTitle";
-import { useLogoSettings } from "../../../context/LogoSettingsContext";
-import defaultImage from "../../../assets/profile.jpg";
+import api from "../../../api/axios";// your axios instance
 
-const DEFAULT_LOGO = defaultImage;
-const DEFAULT_FAVICON = defaultImage;
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL_Image_URl;
+const DEFAULT_LOGO = null;
+const DEFAULT_FAVICON = null;
 
 export default function LogoSettings() {
-  useDynamicTitle("Logo Settings");
-
-  const { settings, getLogoSettings, updateLogoSettings } = useLogoSettings();
-
   const [editMode, setEditMode] = useState(false);
 
   const [appName, setAppName] = useState("");
@@ -23,25 +15,28 @@ export default function LogoSettings() {
   const [logoFile, setLogoFile] = useState(null);
   const [faviconFile, setFaviconFile] = useState(null);
 
-  /* ---------------- LOAD SETTINGS ---------------- */
+  /* ---------------- GET SETTINGS ---------------- */
+  const fetchSettings = async () => {
+    try {
+      const res = await api.get("/dashboard/logo-settings");
+
+      const data = res.data.data;
+
+      setAppName(data.app_name || "");
+      setLogo(data.logo || DEFAULT_LOGO);
+      setFavicon(data.favicon || DEFAULT_FAVICON);
+    } catch (err) {
+      console.error("Failed to load app settings", err);
+    }
+  };
+
   useEffect(() => {
-    getLogoSettings();
+    fetchSettings();
   }, []);
-
-  /* ---------------- MAP CONTEXT DATA ---------------- */
-  useEffect(() => {
-    if (!settings) return;
-
-    setAppName(settings.app_name ?? "");
-
-    setLogo(settings.app_logo_url || DEFAULT_LOGO);
-
-    setFavicon(settings.app_favicon_url || DEFAULT_FAVICON);
-  }, [settings]);
 
   /* ---------------- IMAGE HANDLER ---------------- */
   const handleImageChange = (e, type) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files[0];
     if (!file) return;
 
     const preview = URL.createObjectURL(file);
@@ -57,24 +52,28 @@ export default function LogoSettings() {
 
   /* ---------------- SAVE ---------------- */
   const handleSave = async () => {
-    const formData = new FormData();
+    try {
+      const formData = new FormData();
 
-    formData.append("app_name", appName);
+      formData.append("app_name", appName);
 
-    if (logoFile) {
-      formData.append("app_logo", logoFile);
-    }
+      if (logoFile) {
+        formData.append("logo", logoFile);
+      }
 
-    if (faviconFile) {
-      formData.append("app_favicon", faviconFile);
-    }
+      if (faviconFile) {
+        formData.append("favicon", faviconFile);
+      }
 
-    const success = await updateLogoSettings(formData);
+      await api.put("/dashboard/update-logo-settings", formData);
 
-    if (success) {
       setEditMode(false);
       setLogoFile(null);
       setFaviconFile(null);
+
+      fetchSettings(); // refresh with server URLs
+    } catch (err) {
+      console.error("Update failed", err);
     }
   };
 
@@ -131,27 +130,28 @@ export default function LogoSettings() {
         <div className="flex items-center gap-6">
           <div className="w-24 h-24 rounded-full border bg-gray-50 overflow-hidden flex items-center justify-center">
             {logo ? (
-              <img
-                src={logo}
-                alt="Logo"
-                className="w-full h-full object-contain"
-              />
+              <img src={logo} alt="Logo" className="w-full h-full object-contain" />
             ) : (
               <span className="text-gray-400 text-sm">No Logo</span>
             )}
           </div>
 
-          {editMode && (
-            <label className="px-4 py-1.5 text-sm border rounded-lg cursor-pointer hover:bg-gray-50">
-              Upload
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={(e) => handleImageChange(e, "logo")}
-              />
-            </label>
-          )}
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Company Logo</p>
+            <p className="text-xs text-gray-500">512 × 512 px</p>
+
+            {editMode && (
+              <label className="px-4 py-1.5 text-sm border rounded-lg cursor-pointer hover:bg-gray-50">
+                Upload
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={(e) => handleImageChange(e, "logo")}
+                />
+              </label>
+            )}
+          </div>
         </div>
 
         <hr />
@@ -170,17 +170,22 @@ export default function LogoSettings() {
             )}
           </div>
 
-          {editMode && (
-            <label className="px-4 py-1.5 text-sm border rounded-lg cursor-pointer hover:bg-gray-50">
-              Upload
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={(e) => handleImageChange(e, "favicon")}
-              />
-            </label>
-          )}
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Favicon</p>
+            <p className="text-xs text-gray-500">32 × 32 px</p>
+
+            {editMode && (
+              <label className="px-4 py-1.5 text-sm border rounded-lg cursor-pointer hover:bg-gray-50">
+                Upload
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={(e) => handleImageChange(e, "favicon")}
+                />
+              </label>
+            )}
+          </div>
         </div>
       </div>
     </SettingsLayout>

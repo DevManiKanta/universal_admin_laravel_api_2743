@@ -1,18 +1,15 @@
-import { useState, useEffect } from "react";
-import CategoryForm from "./CategoryForm";
-import SubCategoryForm from "./SubCategoryForm";
-import useDynamicTitle from "../hooks/useDynamicTitle";
-import api from "../api/axios";
+//src/pages/Category.jsx
 
+import { useState, useMemo,useEffect } from "react";
+import CategoryForm from "./components/CategoryForm";
+
+import api from "../api/axios";
 const PAGE_SIZES = [5, 10, 20];
 
 export default function Category() {
-  useDynamicTitle("Categories");
-
-  /* ================= STATE ================= */
-  const [categories, setCategories] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false);
+const [categories, setCategories] = useState([]);
+const [totalPages, setTotalPages] = useState(1);
+const [loading, setLoading] = useState(false);
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -21,51 +18,20 @@ export default function Category() {
   const [openForm, setOpenForm] = useState(false);
   const [editData, setEditData] = useState(null);
 
-  const [openSubForm, setOpenSubForm] = useState(false);
-  const [parentCategory, setParentCategory] = useState(null);
-
-  /* 🔥 Parent autosuggest states */
-  const [parentSearch, setParentSearch] = useState("");
-  const [parentSuggestions, setParentSuggestions] = useState([]);
-  const [selectedParent, setSelectedParent] = useState(null);
-
-  /* ================= FETCH ================= */
-  const fetchCategories = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get("/admin-dashboard/list-category", {
-        params: { search, page, perPage },
-      });
-      setCategories(res.data.data);
-      setTotalPages(res.data.pagination.totalPages);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, [search, page, perPage]);
-
-  /* ================= AUTO SUGGEST ================= */
-  useEffect(() => {
-    if (!parentSearch.trim()) {
-      setParentSuggestions([]);
-      return;
-    }
-
-    const parents = categories.filter(
-      (c) =>
-        !c.parent_id &&
-        c.name.toLowerCase().includes(parentSearch.toLowerCase()),
+  /* 🔍 SEARCH */
+  const filtered = useMemo(() => {
+    return categories.filter((c) =>
+      c.name.toLowerCase().includes(search.toLowerCase())
     );
+  }, [categories, search]);
 
-    setParentSuggestions(parents);
-  }, [parentSearch, categories]);
+  /* 📄 PAGINATION */
+  // const totalPages = Math.ceil(filtered.length / perPage);
+  const paginated = filtered.slice(
+    (page - 1) * perPage,
+    page * perPage
+  );
 
-  /* ================= CRUD ================= */
   const handleAdd = () => {
     setEditData(null);
     setOpenForm(true);
@@ -77,103 +43,84 @@ export default function Category() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Delete this category?")) return;
-    try {
-      await api.delete(`/admin-dashboard/delete-category/${id}`);
-      fetchCategories();
-    } catch (e) {
-      alert(e.response?.data?.message || "Delete failed");
-    }
-  };
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this category?"
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    await api.delete(`/dashboard/delete-category/${id}`);
+    fetchCategories(); // reload list
+  } catch (error) {
+    alert(error.response?.data?.message || "Delete failed");
+  }
+};
+
 
   const handleSave = async (formData, id) => {
     try {
       if (id) {
-        await api.post(`/admin-dashboard/update-category/${id}`, formData);
+        // UPDATE
+        await api.put(`/dashboard/update-category/${id}`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       } else {
-        await api.post("/admin-dashboard/add-category", formData);
+        // CREATE
+        await api.post("/dashboard/add-category", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       }
+
       setOpenForm(false);
       setEditData(null);
-      fetchCategories();
-    } catch (e) {
-      alert(e.response?.data?.message || "Save failed");
+      fetchCategories(); // 🔥 reload list
+    } catch (error) {
+      alert(error.response?.data?.message || "Something went wrong");
     }
   };
 
-  const handleAddSubCategory = (cat) => {
-    setParentCategory(cat);
-    setOpenSubForm(true);
-  };
 
-  /* ================= FILTER RESULT ================= */
-  const displayedCategories = selectedParent
-    ? categories.filter(
-        (c) => c.id === selectedParent.id || c.parent_id === selectedParent.id,
-      )
-    : categories;
+  const fetchCategories = async () => {
+  try {
+    setLoading(true);
 
-  /* ================= UI ================= */
+    const res = await api.get("/dashboard/list-category", {
+      params: {
+        search,
+        page,
+        perPage,
+      },
+    });
+
+    setCategories(res.data.data);
+    setTotalPages(res.data.pagination.totalPages);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
+useEffect(() => {
+  fetchCategories();
+}, [search, page, perPage]);
+
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="text-2xl font-semibold">Categories</h1>
 
-        <div className="flex gap-3 flex-wrap items-start">
-          {/* Normal Search */}
+        <div className="flex gap-3">
           <input
-            placeholder="Search..."
+            placeholder="Search category..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="border px-3 py-2 rounded-lg w-60"
+            className="h-10 px-3 border rounded-lg text-sm w-full md:w-64"
           />
-
-          {/* 🔥 Parent Auto Suggest */}
-          <div className="relative w-64">
-            <input
-              value={parentSearch}
-              onChange={(e) => {
-                setParentSearch(e.target.value);
-                setSelectedParent(null);
-              }}
-              placeholder="Search Parent Category..."
-              className="border px-3 py-2 rounded-lg w-full"
-            />
-
-            {parentSuggestions.length > 0 && (
-              <div className="absolute z-30 bg-white border rounded-lg shadow w-full mt-1 max-h-48 overflow-auto">
-                {parentSuggestions.map((p) => (
-                  <div
-                    key={p.id}
-                    onClick={() => {
-                      setSelectedParent(p);
-                      setParentSearch(p.name);
-                      setParentSuggestions([]);
-                    }}
-                    className="px-3 py-2 hover:bg-indigo-50 cursor-pointer"
-                  >
-                    {p.name}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {selectedParent && (
-            <button
-              onClick={() => {
-                setSelectedParent(null);
-                setParentSearch("");
-              }}
-              className="text-sm text-red-500"
-            >
-              Clear Parent Filter
-            </button>
-          )}
 
           <button
             onClick={handleAdd}
@@ -184,67 +131,52 @@ export default function Category() {
         </div>
       </div>
 
-      {/* TABLE */}
-      <div className="bg-white rounded-xl shadow overflow-hidden hidden md:block">
+      {/* DESKTOP TABLE */}
+      <div className="hidden md:block bg-white rounded-xl shadow-sm overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-100">
+          <thead className="bg-gray-100 text-gray-600">
             <tr>
-              <th className="p-3 text-left">Image</th>
-              <th className="p-3 text-left">Category</th>
-              <th className="p-3 text-left">Parent</th>
-              <th className="p-3 text-left">Action</th>
+              <th className="px-4 py-3 text-left">Image</th>
+              <th className="px-4 py-3 text-left">Category Name</th>
+              <th className="px-4 py-3 text-left">Action</th>
             </tr>
           </thead>
 
           <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="4" className="text-center py-6">
-                  Loading...
+            {paginated.map((cat) => (
+              <tr key={cat.id} className="border-t">
+                <td className="px-4 py-3">
+                  <CategoryImage image={cat.full_image_url} />
                 </td>
+                <td className="px-4 py-3 font-medium">
+                  {cat.name}
+                </td>
+                
+                <td className="px-4 py-3 space-x-4">
+                <button
+                  onClick={() => handleEdit(cat)}
+                  className="text-indigo-600 hover:underline"
+                >
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => handleDelete(cat.id)}
+                  className="text-red-600 hover:underline"
+                >
+                  Delete
+                </button>
+              </td>
+
               </tr>
-            ) : displayedCategories.length ? (
-              displayedCategories.map((cat) => (
-                <tr key={cat.id} className="border-t">
-                  <td className="p-3">
-                    <CategoryImage image={cat.full_image_url} />
-                  </td>
+            ))}
 
-                  <td className="p-3 font-medium">{cat.name}</td>
-
-                  <td className="p-3 text-gray-500">
-                    {cat.parent_name || "—"}
-                  </td>
-
-                  <td className="p-3 space-x-3">
-                    <button
-                      onClick={() => handleEdit(cat)}
-                      className="text-indigo-600"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(cat.id)}
-                      className="text-red-600"
-                    >
-                      Delete
-                    </button>
-
-                    {!cat.parent_id && (
-                      <button
-                        onClick={() => handleAddSubCategory(cat)}
-                        className="text-green-600"
-                      >
-                        Add Sub Category
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))
-            ) : (
+            {paginated.length === 0 && (
               <tr>
-                <td colSpan="4" className="text-center py-6">
+                <td
+                  colSpan="3"
+                  className="text-center py-8 text-gray-500"
+                >
                   No categories found
                 </td>
               </tr>
@@ -253,39 +185,85 @@ export default function Category() {
         </table>
       </div>
 
-      {/* PAGINATION */}
-      {totalPages > 1 && (
-        <div className="flex justify-between items-center">
-          <select
-            value={perPage}
-            onChange={(e) => {
-              setPerPage(+e.target.value);
-              setPage(1);
-            }}
-            className="border px-2 py-1 rounded"
+      {/* MOBILE CARDS */}
+      <div className="md:hidden space-y-4">
+        {paginated.map((cat) => (
+          <div
+            key={cat.id}
+            className="bg-white border rounded-xl p-4 flex gap-4 items-center"
           >
-            {PAGE_SIZES.map((s) => (
-              <option key={s}>{s}</option>
-            ))}
-          </select>
+            <CategoryImage image={cat.full_image_url} size="lg" />
+            <div className="flex-1">
+              <p className="font-medium">{cat.name}</p>
+              <button
+                onClick={() => handleEdit(cat)}
+                className="text-indigo-600 text-sm mt-1"
+              >
+                Edit
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
 
-          <div className="flex gap-2">
+      {/* PAGINATION CONTROLS */}
+      {totalPages > 1 && (
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          {/* PAGE SIZE */}
+          <div className="flex items-center gap-2 text-sm">
+            <span>Show</span>
+            <select
+              value={perPage}
+              onChange={(e) => {
+                setPerPage(Number(e.target.value));
+                setPage(1);
+              }}
+              className="border rounded px-2 py-1"
+            >
+              {PAGE_SIZES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <span>entries</span>
+          </div>
+
+          {/* PAGE NUMBERS */}
+          <div className="flex items-center gap-2">
+            <button
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Prev
+            </button>
+
             {Array.from({ length: totalPages }).map((_, i) => (
               <button
                 key={i}
                 onClick={() => setPage(i + 1)}
-                className={`px-3 py-1 border rounded ${
-                  page === i + 1 ? "bg-indigo-600 text-white" : ""
+                className={`px-3 py-1 rounded border text-sm ${
+                  page === i + 1
+                    ? "bg-indigo-600 text-white border-indigo-600"
+                    : "hover:bg-gray-100"
                 }`}
               >
                 {i + 1}
               </button>
             ))}
+
+            <button
+              disabled={page === totalPages}
+              onClick={() => setPage(page + 1)}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
           </div>
         </div>
       )}
 
-      {/* MODALS */}
       {openForm && (
         <CategoryForm
           data={editData}
@@ -293,28 +271,32 @@ export default function Category() {
           onSave={handleSave}
         />
       )}
-
-      {openSubForm && parentCategory && (
-        <SubCategoryForm
-          category={parentCategory}
-          onClose={() => setOpenSubForm(false)}
-          onSaved={fetchCategories}
-        />
-      )}
     </div>
   );
 }
 
-/* ================= IMAGE ================= */
-function CategoryImage({ image }) {
+/* ================= IMAGE PLACEHOLDER ================= */
+
+function CategoryImage({ image, size = "sm" }) {
+  const sizes =
+    size === "lg"
+      ? "w-16 h-16"
+      : "w-12 h-12";
+
   return (
-    <div className="w-12 h-12 border rounded bg-gray-100 overflow-hidden">
+    <div
+      className={`${sizes} rounded-lg bg-gray-100 border flex items-center justify-center overflow-hidden`}
+    >
       {image ? (
-        <img src={image} className="w-full h-full object-cover" />
+        <img
+          src={image}
+          alt=""
+          className="w-full h-full object-cover"
+        />
       ) : (
-        <div className="text-xs text-gray-400 flex items-center justify-center h-full">
+        <span className="text-gray-400 text-xs">
           No Image
-        </div>
+        </span>
       )}
     </div>
   );
