@@ -12,7 +12,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 /* PAGES */
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Products from "./pages/Products";
+import ProductsNew from "./pages/ProductsNew";
 import Employees from "./pages/Employees";
 import ComingSoon from "./pages/ComingSoon";
 import Category from "./pages/Category";
@@ -40,6 +40,10 @@ import VariationSettings from "./pages/settings/components/VariationSettings";
 import WhatsAppIntegrationSettings from "./pages/settings/components/WhatsAppIntegrationSettings";
 import CouponSettings from "./pages/settings/components/CouponSettings";
 import BannerSettings from "./pages/settings/components/BannerSettings";
+import ContactSettings from "./pages/settings/components/ContactSettings";
+import CustomerCareSettings from "./pages/settings/components/CustomerCareSettings";
+import BannerAdmin from "./pages/settings/components/BannerAdmin";
+import ShippingSettings from "./pages/settings/components/ShippingSettings";
 
 /* PROVIDERS */
 import { LogoSettingsProvider } from "./context/LogoSettingsContext";
@@ -49,12 +53,43 @@ import { ProfileProvider } from "./context/ProfileContext";
 import BrandProtectedRoute from "./auth/BrandProtectedRoute";
 import ManualOrders1 from "./pages/ManualOrders1";
 import MyAttendance from "./pages/MyAttendance";
+import SectionManager from "./pages/SectionManager";
+import SectionList from "./pages/admin/section/SectionList";
+import SectionDragDrop from "./pages/admin/section/SectionDragDrop";
+import PageList from "./pages/admin/pages/PageList";
+import BlogCategoryList from "./pages/admin/blog-category/CategoryList";
+import BlogList from "./pages/admin/blog/BlogList";
 
 export default function App() {
   const user = JSON.parse(localStorage.getItem("user"));
   const role = user?.role;
 
   console.log("User role:", role);
+
+  const settingsRoutes = (
+    <>
+      <Route index element={<Navigate to="profile" replace />} />
+      <Route path="profile" element={<ProfileSettings />} />
+      <Route path="logo" element={<LogoSettings />} />
+      <Route path="social-media" element={<SocialMediaSettings />} />
+      <Route path="payment-gateway" element={<PaymentGatewaySettings />} />
+      <Route path="variation-settings" element={<VariationSettings />} />
+      <Route path="whatsapp-integration" element={<WhatsAppIntegrationSettings />} />
+      <Route path="contact-page" element={<ContactSettings />} />
+      <Route path="customer-care-settings" element={<CustomerCareSettings />} />
+      <Route path="coupons-settings" element={<CouponSettings />} />
+      <Route path="banner-settings" element={<BannerSettings />} />
+      <Route path="landing-banner-settings" element={<BannerAdmin />} />
+      <Route path="shipping-settings" element={<ShippingSettings />} />
+      <Route path="product-sections" element={<SectionManager />} />
+      <Route path="footer-sections" element={<SectionList />} />
+      <Route path="footer-sections/reorder" element={<SectionDragDrop />} />
+      <Route path="pages" element={<PageList />} />
+      <Route path="blog-categories" element={<BlogCategoryList />} />
+      <Route path="blogs" element={<BlogList />} />
+      <Route path="*" element={<Navigate to="profile" replace />} />
+    </>
+  );
 
   return (
     <BrowserRouter>
@@ -108,7 +143,7 @@ export default function App() {
                   {isHerbal && (
                     <>
                       <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/products" element={<Products />} />
+                      <Route path="/products" element={<ProductsNew />} />
                       <Route path="/add-categories" element={<AddCategory />} />
                       <Route path="/pos" element={<POS />} />
                       <Route
@@ -129,36 +164,6 @@ export default function App() {
                         element={<StaffAttendanceCalendar />}
                       />
                       <Route path="/online-orders" element={<OrdersPage />} />
-
-                      {/* SETTINGS */}
-                      <Route path="/settings" element={<SettingsPage />}>
-                        <Route path="profile" element={<ProfileSettings />} />
-                        <Route path="logo" element={<LogoSettings />} />
-                        <Route
-                          path="social-media"
-                          element={<SocialMediaSettings />}
-                        />
-                        <Route
-                          path="payment-gateway"
-                          element={<PaymentGatewaySettings />}
-                        />
-                        <Route
-                          path="variation-settings"
-                          element={<VariationSettings />}
-                        />
-                        <Route
-                          path="whatsapp-integration"
-                          element={<WhatsAppIntegrationSettings />}
-                        />
-                        <Route
-                          path="coupons-settings"
-                          element={<CouponSettings />}
-                        />
-                        <Route
-                          path="banner-settings"
-                          element={<BannerSettings />}
-                        />
-                      </Route>
                     </>
                   )}
 
@@ -166,7 +171,7 @@ export default function App() {
                   {isHamsini && (
                     <>
                       <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/products" element={<Products />} />
+                      <Route path="/products" element={<ProductsNew />} />
                       <Route path="/categories" element={<Category />} />
                       <Route
                         path="/staff-attendance"
@@ -195,33 +200,9 @@ export default function App() {
 
                   {/* SETTINGS */}
                   <Route path="/settings" element={<SettingsPage />}>
-                    <Route path="profile" element={<ProfileSettings />} />
-                    <Route path="logo" element={<LogoSettings />} />
-                    <Route
-                      path="social-media"
-                      element={<SocialMediaSettings />}
-                    />
-                    <Route
-                      path="payment-gateway"
-                      element={<PaymentGatewaySettings />}
-                    />
-                    <Route
-                      path="variation-settings"
-                      element={<VariationSettings />}
-                    />
-                    <Route
-                      path="whatsapp-integration"
-                      element={<WhatsAppIntegrationSettings />}
-                    />
-                    <Route
-                      path="coupons-settings"
-                      element={<CouponSettings />}
-                    />
-                    <Route
-                      path="banner-settings"
-                      element={<BannerSettings />}
-                    />
+                    {settingsRoutes}
                   </Route>
+                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </>
               )}
             </Route>

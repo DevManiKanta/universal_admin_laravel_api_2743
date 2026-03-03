@@ -186,7 +186,7 @@
 // }
 
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Home,
@@ -197,14 +197,41 @@ import {
   Package,
   Settings,
   Users,
+  LogOut,
+  ChevronRight,
 } from "lucide-react";
-import { useProfile } from "../context/ProfileContext";
 import { useLogoSettings } from "../context/LogoSettingsContext";
 import defaultimage from "../assets/profile.jpg";
 import { isHerbal, isHamsini } from "../config/projectConfig.js";
 
 const SIDEBAR_WIDTH = "88px";
 const FALLBACK_LOGO = defaultimage;
+
+function SidebarItem({ to, icon, label, isActive, onClick }) {
+  const IconComponent = icon;
+  const active = isActive(to);
+
+  return (
+    <Link
+      to={to}
+      onClick={onClick}
+      className={`group relative flex flex-col items-center justify-center gap-1.5 rounded-lg py-3 px-2 text-center transition-all duration-200 ${
+        active
+          ? "bg-indigo-100 text-indigo-600"
+          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+      }`}
+      title={label}
+    >
+      <IconComponent size={20} className="transition-transform group-hover:scale-110" />
+      <span className="max-w-[64px] text-[10px] leading-tight font-medium">{label}</span>
+
+      {/* Tooltip on hover */}
+      <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
+        {label}
+      </div>
+    </Link>
+  );
+}
 
 export default function Sidebar({ open, setOpen, logout }) {
   const location = useLocation();
@@ -213,156 +240,96 @@ export default function Sidebar({ open, setOpen, logout }) {
   const user = JSON.parse(localStorage.getItem("user"));
   const role = user?.role;
 
-  const [logo, setLogo] = useState(FALLBACK_LOGO);
-
   useEffect(() => {
     getLogoSettings();
-  }, []);
+  }, [getLogoSettings]);
 
-  useEffect(() => {
-    if (!logoSettings) return;
-    setLogo(logoSettings.app_logo_url || FALLBACK_LOGO);
-  }, [logoSettings]);
+  const logo = logoSettings?.app_logo_url || FALLBACK_LOGO;
 
   const isActive = (path) =>
-    location.pathname.startsWith(path)
-      ? "bg-yellow-200 text-orange-600"
-      : "text-gray-700 hover:bg-green-100";
+    location.pathname.startsWith(path);
 
-  const Item = ({ to, icon: Icon, label }) => (
-    <Link
-      to={to}
-      onClick={() => setOpen(false)}
-      className={`flex flex-col items-center justify-center gap-1 py-3 rounded-lg text-center ${isActive(
-        to
-      )}`}
-    >
-      <Icon size={20} />
-      <span className="text-[10px] leading-tight max-w-[64px]">
-        {label}
-      </span>
-    </Link>
-  );
+  const menuItems = {
+    employee: [
+      { to: "/pos", icon: ShoppingCart, label: "POS" },
+      { to: "/pos/orders", icon: Package, label: "POS Orders" },
+      { to: "/staff-attendance", icon: Users, label: "Attendance" },
+      { to: "/customers", icon: Users, label: "Customers" },
+    ],
+    admin_herbal: [
+      { to: "/dashboard", icon: Home, label: "Dashboard" },
+      { to: "/products", icon: Box, label: "Products" },
+      { to: "/add-categories", icon: Tag, label: "Categories" },
+      { to: "/pos", icon: ShoppingCart, label: "POS" },
+      { to: "/pos/orders", icon: Package, label: "POS Orders" },
+      { to: "/online-orders", icon: Package, label: "Online Orders" },
+      { to: "/customers", icon: Users, label: "Customers" },
+      { to: "/users", icon: Users, label: "Users" },
+      { to: "/staff-attendance", icon: Users, label: "Attendance" },
+      { to: "/settings/profile", icon: Settings, label: "Settings" },
+    ],
+    admin_hamsini: [
+      { to: "/dashboard", icon: Home, label: "Dashboard" },
+      { to: "/products", icon: Box, label: "Products" },
+      { to: "/categories", icon: Tag, label: "Categories" },
+      { to: "/orders", icon: Package, label: "Orders" },
+      { to: "/users", icon: Users, label: "Users" },
+      { to: "/staff-attendance", icon: Users, label: "Attendance" },
+      { to: "/settings/profile", icon: Settings, label: "Settings" },
+    ],
+  };
+
+  let items = [];
+  if (role === "employee") {
+    items = menuItems.employee;
+  } else if (role === "admin") {
+    items = isHerbal ? menuItems.admin_herbal : menuItems.admin_hamsini;
+  }
 
   return (
     <aside
       className={`
         fixed inset-y-0 left-0 z-40
-        w-[88px] bg-green-50 border-r
+        w-[88px] bg-white border-r border-gray-200
         transform transition-transform duration-300 ease-in-out
         ${open ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0
+        flex flex-col
       `}
       style={{ width: SIDEBAR_WIDTH }}
     >
-      <div className="h-full flex flex-col">
-        {/* LOGO */}
-        <div className="h-16 flex items-center justify-center border-b">
-          <img src={logo} alt="App Logo" className="h-8" />
-        </div>
+      {/* Logo Section */}
+      <div className="h-16 flex items-center justify-center border-b border-gray-200 bg-gradient-to-b from-gray-50 to-white">
+        <img src={logo} alt="App Logo" className="h-8 w-auto object-contain" />
+      </div>
 
-        {/* MENU */}
-        <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+      {/* Menu Items */}
+      <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+        {items.map((item) => (
+          <SidebarItem
+            key={item.to}
+            to={item.to}
+            icon={item.icon}
+            label={item.label}
+            isActive={isActive}
+            onClick={() => setOpen(false)}
+          />
+        ))}
+      </nav>
 
-          {/* ================= EMPLOYEE ================= */}
-          {role === "employee" && (
-            <>
-              <Item to="/pos" icon={ShoppingCart} label="POS" />
-             
-              <Item to="/pos/orders" icon={Package} label="POS Orders" />
-
-            
-
-                  
-                       
-              <Item
-                to="/staff-attendance"
-                icon={Users}
-                label="Staff Attendance"
-              />
-
-
-                <Item
-                to="/customers"
-                icon={Users}
-                label="Customers"
-              />
-
-
-              
-            </>
-          )}
-
-          {/* ================= ADMIN ================= */}
-          {role === "admin" && (
-            <>
-              {isHerbal && (
-                <>
-                  <Item to="/dashboard" icon={Home} label="Dashboard" />
-                  <Item to="/products" icon={Box} label="Products" />
-                  <Item
-                    to="/add-categories"
-                    icon={Tag}
-                    label="Add Category"
-                  />
-                  <Item to="/pos" icon={ShoppingCart} label="POS" />
-                  <Item
-                    to="/pos/orders"
-                    icon={Package}
-                    label="POS Orders"
-                  />
-                  <Item
-                    to="/online-orders"
-                    icon={Package}
-                    label="Online Orders"
-                  />
-                  <Item to="/customers" icon={Users} label="Customers" />
-                  <Item to="/users" icon={Users} label="Users" />
-                  <Item
-                    to="/staff-attendance"
-                    icon={Users}
-                    label="Staff Attendance"
-                  />
-                  <Item
-                    to="/settings/profile"
-                    icon={Settings}
-                    label="Settings"
-                  />
-                </>
-              )}
-
-              {isHamsini && (
-                <>
-                  <Item to="/dashboard" icon={Home} label="Dashboard" />
-                  <Item to="/products" icon={Box} label="Products" />
-                  <Item to="/categories" icon={Tag} label="Category" />
-                  <Item to="/orders" icon={Package} label="Orders" />
-                  <Item to="/users" icon={Users} label="Users" />
-                  <Item
-                    to="/staff-attendance"
-                    icon={Users}
-                    label="Staff Attendance"
-                  />
-                  <Item
-                    to="/settings/profile"
-                    icon={Settings}
-                    label="Settings"
-                  />
-                </>
-              )}
-            </>
-          )}
-        </nav>
-
-        {/* LOGOUT */}
-        <div className="p-2 border-t">
-          <button
-            onClick={logout}
-            className="w-full bg-red-500 hover:bg-red-600 text-white text-xs py-2 rounded-lg"
-          >
-            Logout
-          </button>
-        </div>
+      {/* Logout Button */}
+      <div className="p-2 border-t border-gray-200 bg-gray-50">
+        <button
+          onClick={() => {
+            logout();
+            setOpen(false);
+          }}
+          className="w-full flex flex-col items-center justify-center gap-1 rounded-lg py-3 px-2 text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all duration-200 group"
+          title="Logout"
+        >
+          <LogOut size={20} className="transition-transform group-hover:scale-110" />
+          <span className="text-[10px] leading-tight font-medium">Logout</span>
+        </button>
       </div>
     </aside>
   );
